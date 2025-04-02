@@ -9,6 +9,7 @@ from api.commands import setup_commands
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
 
 # Configuración de entorno y directorios
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -16,6 +17,7 @@ static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../
 
 # Inicializar la aplicación Flask
 app = Flask(__name__)
+CORS(app)
 app.url_map.strict_slashes = False
 
 # Configuración de la base de datos

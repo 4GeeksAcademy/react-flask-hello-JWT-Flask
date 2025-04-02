@@ -4,10 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 export const LoginSignup = () => {
     const navigate = useNavigate();
 
-    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [isSignup, setIsSignup] = useState(false);  // Para saber si estamos en el flujo de signup o login
+    const [isSignup, setIsSignup] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -19,11 +18,10 @@ export const LoginSignup = () => {
         setSuccessMessage('');
 
         try {
-            const dataUser = { name, email, password };
+            const dataUser = { email, password };
 
             if (isSignup) {
-                // Llamada a la API para registrarse
-                const response = await fetch(`${import.meta.env.VARIABLE_NAME}/api/signup`, {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dataUser)
@@ -39,14 +37,13 @@ export const LoginSignup = () => {
                     throw new Error('No se recibió el token');
                 }
 
-                sessionStorage.setItem('token', token);  // Guardar el token en sessionStorage
+                sessionStorage.setItem('token', token);
                 setSuccessMessage('Usuario registrado exitosamente');
                 setTimeout(() => {
-                    setIsSignup(false);  // Cambiar a login después del registro exitoso
+                    setIsSignup(false);
                 }, 2000);
             } else {
-                // Llamada a la API para hacer login
-                const response = await fetch(`${import.meta.env.VARIABLE_NAME}/api/login`, {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
@@ -62,12 +59,10 @@ export const LoginSignup = () => {
                     throw new Error('No se recibió el token');
                 }
 
-                sessionStorage.setItem('token', token);  // Guardar el token en sessionStorage
-                navigate('/private');  // Redirigir al usuario a la página privada
+                sessionStorage.setItem('token', token);
+                navigate('/private');
             }
 
-            // Limpiar los campos después de la solicitud
-            setName('');
             setEmail('');
             setPassword('');
         } catch (error) {
@@ -78,13 +73,7 @@ export const LoginSignup = () => {
     };
 
     return (
-        <div className="d-flex justify-content-center align-items-center min-vh-100" 
-            style={{
-                background: "",
-                backgroundSize: "cover",
-                padding: "2rem"
-            }}
-        >
+        <div className="d-flex justify-content-center align-items-center min-vh-100" style={{ padding: "2rem" }}>
             <div className="card shadow-lg p-5" style={{
                 width: "100%",
                 maxWidth: "35rem",
@@ -99,20 +88,6 @@ export const LoginSignup = () => {
                     </h2>
 
                     <form onSubmit={handleSubmit}>
-                        {isSignup && (
-                            <div className="mb-3">
-                                <input
-                                    type="text"
-                                    className="form-control p-3"
-                                    placeholder="Nombre"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    required
-                                    style={{ borderRadius: "10px", border: "2px solid #ddd" }}
-                                />
-                            </div>
-                        )}
-
                         <div className="mb-3">
                             <input
                                 type="email"

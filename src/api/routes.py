@@ -31,22 +31,41 @@ def get_user(user_id):
     return jsonify(user.serialize()), 200
 
 # Ruta de Registro
+from flask_jwt_extended import create_access_token
+
 @api.route('/signup', methods=['POST'])
 def create_user():
     data = request.get_json()
-    hashed_password = bcrypt.generate_password_hash(data["password"]).decode('utf-8') 
 
-    new_user = User(
-        name=data["name"],
-        email=data["email"],
-        password=hashed_password
-)
-    if User.query.filter_by(email=data["email"]).first():
+    # Validar que los campos requeridos estén presentes
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"msg": "Email y contraseña son requeridos"}), 400
+
+    # Validar que el usuario no exista antes de crearlo
+    if User.query.filter_by(email=email).first():
         return jsonify({"msg": "El usuario ya existe"}), 400
 
+    # Hashear la contraseña
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    # Crear el usuario
+    new_user = User(email=email, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
-    return jsonify(new_user.serialize()), 201
+
+    # Generar token JWT
+    token = create_access_token(identity=new_user.email)
+
+    return jsonify({
+        "msg": "Usuario registrado exitosamente",
+        "token": token,
+        "user": new_user.serialize()
+    }), 201
+
+
 
 
 # Ruta de Inicio de Sesión (Login)
@@ -67,8 +86,7 @@ def login_user():
         token=create_access_token(identity=user.email)
         user_data = {
             "id": user.id,
-            "email": user.email,
-            "name": user.name
+            "email": user.email
         }
         
         return jsonify({"msg": "inicio de sesion exitoso", "token": token, "user": user_data}), 200
@@ -87,8 +105,7 @@ def get_user_info():
 
     user_data = {
         "id": user.id,
-        "email": user.email,
-        "name": user.name
+        "email": user.email
     }
 
     return jsonify(user_data), 200
